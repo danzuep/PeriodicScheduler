@@ -1,0 +1,26 @@
+# https://levelup.gitconnected.com/cron-docker-the-easiest-job-scheduler-youll-ever-create-e1753eb5ea44
+# https://www.airplane.dev/blog/docker-cron-jobs-how-to-run-cron-inside-containers
+
+# Start with a minimal image
+FROM alpine:latest AS base
+
+# Update existing packages && instal cron
+RUN apk update && \
+    apk upgrade --available && \
+    sync
+
+# Install required packages
+RUN apk add --update --no-cache bash dos2unix
+
+# Change container directory
+WORKDIR "/usr/scheduler"
+
+# Copy local files into the container directory
+COPY "crontab.*" .
+COPY "start.sh" .
+
+# Give execute permissions to copied script files
+RUN find . -type f -iname "*.sh" -exec chmod +x {}
+
+# Run cron on container startup
+CMD ["./start.sh"]
